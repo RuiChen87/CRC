@@ -27,6 +27,9 @@ if width == 32
 elseif width == 16
     crc = uint16(hex2dec(init));
     xorout = uint16(hex2dec(xorval));
+elseif width == 8
+    crc = uint8(hex2dec(init));
+    xorout = uint8(hex2dec(xorval));
 end
 
 data_len = length(data);
@@ -36,7 +39,7 @@ for i = 1 : data_len
     % 步骤2
     % 输入数据按字节翻转
     if ~refin
-        tmp = dec2bin(tmp, 16);
+        tmp = dec2bin(tmp, 8);
         tmp = tmp(8:-1:1);
         tmp = bin2dec(tmp);
 %         if width == 32
@@ -57,11 +60,16 @@ for i = 1 : data_len
     end
 
     % 计算CRC
-    temp1 = bitand(bitxor(crc, tmp), 255); % 步骤3
-    crc1 = bitshift(crc, -8); % 步骤4
-    crc = bitxor(tab(temp1+1), crc1); % % 步骤5：查找table，并于CRC1异或，这里+1，主要是由于matlab的index起始从1开始
+    if width == 16 || width == 32
+        temp1 = bitand(bitxor(crc, tmp), 255); % 步骤3
+        crc1 = bitshift(crc, -8); % 步骤4
+        crc = bitxor(tab(temp1+1), crc1); % % 步骤5：查找table，并于CRC1异或，这里+1，主要是由于matlab的index起始从1开始
+    elseif width == 8
+        temp1 = bitxor(crc, tmp);
+        crc = tab(temp1+1);
+    end
 end
-
+    
 % 步骤7：输出数据翻转
 if ~refout
     if width == 32
@@ -72,6 +80,10 @@ if ~refout
         crc = dec2bin(crc, 16);
         crc = crc(end:-1:1);
         crc = uint16(bin2dec(crc));
+    elseif width == 8
+        crc = dec2bin(crc, 8);
+        crc = crc(end:-1:1);
+        crc = uint8(bin2dec(crc));
     end
     
 end

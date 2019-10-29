@@ -25,6 +25,10 @@ else
         ploy = dec2bin(ploy, 16);
         ploy = ploy(end:-1:1);
         ploy = uint16(bin2dec(ploy));
+    elseif width == 8
+        ploy = dec2bin(ploy, 8);
+        ploy = ploy(end:-1:1);
+        ploy = uint8(bin2dec(ploy));
     end
 
     if width == 32
@@ -58,6 +62,22 @@ else
             end
     %         crc_tab{i+1} = dec2hex(crc, width/4);
             crc_tab(i+1) = uint16(data);
+        end
+    elseif width == 8
+        %     crc_tab = cell(256, 1);
+        crc_tab = uint8(zeros(256, 1));
+
+        for i = 0 : 255
+            data = uint8(i);
+            for j = 0:7
+                if bitand(data, 1)
+                    data = uint8(bitxor(bitshift(data, -1), ploy)); % bitshift：>0表示向左移位，<0表示向右移位
+                else
+                    data = bitshift(data, -1);
+                end
+            end
+    %         crc_tab{i+1} = dec2hex(crc, width/4);
+            crc_tab(i+1) = uint8(data);
         end
     end
 end

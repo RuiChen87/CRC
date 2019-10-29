@@ -18,7 +18,7 @@ if width == 32
                 crc = bitshift(crc, 1);
             end
         end
-    %     crc_tab{i+1} = dec2hex(crc,8);
+    %     crc_tab{i+1} = dec2hex(crc, width/4);
         crc_tab(i+1) = uint32(crc);
     end
 elseif width == 16
@@ -34,8 +34,24 @@ elseif width == 16
                 crc = bitshift(crc, 1);
             end
         end
-%         crc_tab{i+1} = dec2hex(crc,4);
+%         crc_tab{i+1} = dec2hex(crc, width/4);
         crc_tab(i+1) = uint16(crc);
+    end
+elseif width == 8
+    %     crc_tab = cell(256, 1);
+    crc_tab = uint8(zeros(256, 1));
+
+    for i = 0 : 255
+        crc = bitshift(uint8(i), width-8, 'uint8'); % int 4个字节，32位
+        for j = 0:7
+            if bitand(crc, hex2dec('80'))
+                crc = uint8(bitxor(bitshift(crc, 1), ploy)); % bitshift：>0表示向左移位，<0表示向右移位
+            else
+                crc = bitshift(crc, 1);
+            end
+        end
+%         crc_tab{i+1} = dec2hex(crc, width/4);
+        crc_tab(i+1) = uint8(crc);
     end
 end
 
